@@ -1,0 +1,285 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: grid
+    description: Live grid simulation operations
+  - name: agents
+    description: Autonomous agent activity
+  - name: simulator
+    description: Scenario and disruption controls
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /grid/state:
+    get:
+      operationId: getGridState
+      tags: [grid]
+      summary: Get the current simulated grid state
+      responses:
+        "200":
+          description: Current grid state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GridState"
+  /agents/decisions:
+    get:
+      operationId: getAgentDecisions
+      tags: [agents]
+      summary: Get recent autonomous agent decisions
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Recent decisions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDecisionPage"
+  /history:
+    get:
+      operationId: getGridHistory
+      tags: [grid]
+      summary: Get simulated historical grid metrics
+      parameters:
+        - name: range
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [hour, day]
+            default: day
+      responses:
+        "200":
+          description: Historical grid metrics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HistoryPoint"
+  /disruption:
+    post:
+      operationId: injectDisruption
+      tags: [simulator]
+      summary: Inject a simulated grid disruption
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DisruptionInput"
+      responses:
+        "200":
+          description: Disruption accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DisruptionResult"
+  /simulator/params:
+    post:
+      operationId: updateSimulatorParams
+      tags: [simulator]
+      summary: Update live scenario parameters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimulatorParams"
+      responses:
+        "200":
+          description: Updated scenario parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimulatorParams"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    GridNode:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [solar, wind, battery, ev, load]
+        name:
+          type: string
+        currentOutputKW:
+          type: number
+        capacityKW:
+          type: number
+        status:
+          type: string
+          enum: [stable, warning, critical]
+        batterySoC:
+          type: ["number", "null"]
+      required: [id, type, name, currentOutputKW, capacityKW, status, batterySoC]
+    GridKpis:
+      type: object
+      properties:
+        gridStability:
+          type: number
+        renewableUtilization:
+          type: number
+        costSaved:
+          type: number
+        co2Reduced:
+          type: number
+        frequency:
+          type: number
+        voltage:
+          type: number
+        totalGeneration:
+          type: number
+        totalDemand:
+          type: number
+      required: [gridStability, renewableUtilization, costSaved, co2Reduced, frequency, voltage, totalGeneration, totalDemand]
+    AgentDecision:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+        agentName:
+          type: string
+        action:
+          type: string
+        rationale:
+          type: string
+        confidenceScore:
+          type: number
+        predictedImpact:
+          type: string
+        costImpact:
+          type: number
+        carbonImpact:
+          type: number
+        alternativesConsidered:
+          type: array
+          items:
+            type: string
+        severity:
+          type: string
+          enum: [info, warning, critical]
+      required: [id, timestamp, agentName, action, rationale, confidenceScore, predictedImpact, costImpact, carbonImpact, alternativesConsidered, severity]
+    AgentDecisionPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentDecision"
+        total:
+          type: number
+      required: [items, total]
+    GridState:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/GridNode"
+        kpis:
+          $ref: "#/components/schemas/GridKpis"
+        activeDisruption:
+          type: ["string", "null"]
+        tradingEnabled:
+          type: boolean
+        tradingPrice:
+          type: number
+        tradingTransferKW:
+          type: number
+      required: [timestamp, nodes, kpis, activeDisruption, tradingEnabled, tradingPrice, tradingTransferKW]
+    HistoryPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        generation:
+          type: number
+        demand:
+          type: number
+        batterySoC:
+          type: number
+        stability:
+          type: number
+        costSaved:
+          type: number
+        co2Reduced:
+          type: number
+      required: [timestamp, generation, demand, batterySoC, stability, costSaved, co2Reduced]
+    DisruptionInput:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [outage, demand-spike, renewable-drop]
+        severity:
+          type: number
+          minimum: 0.1
+          maximum: 1
+      required: [type]
+    DisruptionResult:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+        message:
+          type: string
+        state:
+          $ref: "#/components/schemas/GridState"
+      required: [accepted, message, state]
+    SimulatorParams:
+      type: object
+      properties:
+        evDemandMultiplier:
+          type: number
+          minimum: 0.5
+          maximum: 2
+        solarOutputMultiplier:
+          type: number
+          minimum: 0.2
+          maximum: 1.4
+        tradingEnabled:
+          type: boolean
+      required: [evDemandMultiplier, solarOutputMultiplier, tradingEnabled]
+

@@ -1,0 +1,108 @@
+SMART GRID AI — Autonomous Multi-Agent Energy Orchestrator
+1. APP OVERVIEW
+
+App Name: GridPulse AI — Autonomous Multi-Agent Smart Grid Orchestrator
+
+One-line description: A multi-agent AI platform that autonomously monitors, forecasts, and rebalances a distributed energy grid in real time — visualized through a live digital-twin dashboard with full decision explainability.
+
+Core problem it solves: Centralized grid control can't react fast enough to renewable intermittency, demand spikes, and equipment faults. GridPulse simulates a distributed grid (solar, wind, battery, EV, load) and deploys autonomous agents that forecast, negotiate, and act — shifting loads, dispatching batteries, and rerouting power — without human intervention, while explaining every decision.
+
+Target user: Grid operators, utility companies, smart city planners, and campus/industrial energy managers who need situational awareness + autonomous decision support for distributed energy resources.
+
+2. FULL FEATURE LIST
+
+Core (must-have, build first):
+
+Simulated real-time grid with 5+ nodes: solar farm, wind farm, battery storage, EV charging station, residential/industrial load
+Live energy flow visualization (animated digital twin diagram)
+5 autonomous agents running as backend services/loops:
+Grid Coordinator Agent — orchestrates overall strategy
+Renewable Forecasting Agent — predicts solar/wind output (simple ML/statistical model on synthetic weather data)
+Demand Forecasting Agent — predicts consumption using historical pattern + time-of-day
+Battery Management Agent — decides charge/discharge based on price + forecast
+Fault Detection Agent — detects anomalies (voltage/frequency drift, sudden drops) and triggers Emergency Response
+Autonomous decision engine: agents post decisions to a shared event log (load shed, battery dispatch, reroute)
+Explainability panel: every decision shows rationale, confidence score, predicted impact, cost/carbon savings
+Real-time dashboard: live KPIs (grid stability %, renewable utilization %, cost saved, CO₂ reduced)
+Manual "Inject Disruption" button (simulate outage/spike) to demo self-healing live for judges
+Agent activity feed (chat-log style, like a multi-agent conversation transcript)
+
+High-impact for judges (build second):
+
+Grid Digital Twin: animated SVG/canvas diagram with power flow lines that pulse/color-change by load
+Historical charts (Recharts) for demand vs generation vs battery SoC over time
+"What-if" simulation slider (increase EV demand, drop solar output) → agents react live
+Carbon + cost savings counter that ticks up in real time
+Energy trading simulation between two micro-grid zones (Zone A sells surplus to Zone B, priced dynamically)
+
+Nice-to-have (only if time remains):
+
+Dark/light theme toggle
+Downloadable PDF/whitepaper-style decision report
+Weather API integration (real data) for forecasting agent
+Map view (Leaflet) with geo-distributed nodes
+3. TECH STACK
+Frontend: React + Vite + TypeScript, Tailwind CSS, shadcn/ui, Recharts (charts), Framer Motion (animations), lucide-react (icons)
+Backend: Node.js + Express (or FastAPI if Python preferred — use Node for single-language simplicity in Replit)
+Realtime: WebSocket (Socket.IO) to stream live agent decisions + grid state to frontend
+Agent "brains": Simple rule-based + lightweight statistical forecasting (moving average / linear regression) in TypeScript — NOT full LLM agents, to keep it fast and deterministic for a live demo. Optionally call Anthropic API (Claude) for one agent (e.g., Grid Coordinator) to generate natural-language rationale for decisions — this is a strong judge-impress feature.
+Database: In-memory store + simple JSON persistence (or SQLite via better-sqlite3) — no need for Postgres/Kafka/Kubernetes in a hackathon prototype
+Simulation engine: setInterval-driven tick loop (every 2s) generating synthetic sensor data (solar irradiance curve, wind noise, load curve with peaks)
+Deployment: Single Replit Node app serving both API and built React frontend
+4. PAGES & USER FLOW
+Landing / Dashboard (Home) — default view. Shows: KPI cards (Grid Stability, Renewable Utilization, Cost Saved, CO₂ Reduced), digital twin diagram, live agent feed sidebar, "Inject Disruption" button.
+Digital Twin View — full-screen animated grid diagram: nodes (solar, wind, battery, EV, load, two zones) connected by flow lines; line thickness/color = power flow magnitude; click a node → side panel with live stats.
+Agent Console — scrolling transcript of agent-to-agent decisions/negotiations (e.g., "Battery Agent: Discharging 20kW — Grid Coordinator approved"), each entry expandable to show explainability panel (rationale, confidence, impact, alternatives considered).
+Analytics — historical line/area charts: demand vs generation, battery SoC over time, cost/carbon trend; time-range selector (last hour / last 24h simulated).
+Scenario Simulator — sliders/buttons to inject disruptions (outage, demand spike, renewable drop) and a "trading" toggle between Zone A/B; watch dashboard react live.
+
+Navigation: persistent left sidebar (Dashboard, Digital Twin, Agent Console, Analytics, Simulator) — single-page app, no reloads.
+
+5. UI & DESIGN INSTRUCTIONS
+Theme: Dark-mode-first, futuristic control-room aesthetic
+Colors: Background 
+#0B0F19 / 
+#111827, panels 
+#1A2234, accent green 
+#22D3A6 (renewable/positive), amber 
+#F5A623 (warnings), red 
+#EF4444 (faults/critical), blue 
+#38BDF8 (grid/data flow)
+Fonts: Inter for UI text, JetBrains Mono for numeric KPIs/logs
+Layout: Sidebar nav (dark, icon+label), main canvas with card-based grid (rounded-2xl, subtle border, soft shadow), glassmorphism panels for overlays
+Animations: Framer Motion for KPI count-up, pulsing power-flow lines (animated dash-offset on SVG paths), fade/slide-in for new agent feed entries, glowing pulse on nodes when active
+Components: Status badges (Stable/Warning/Critical), progress rings for battery SoC, animated line charts, toast notifications on disruption injection
+6. DATA & APIS
+
+Data models:
+
+GridNode { id, type: 'solar'|'wind'|'battery'|'ev'|'load', name, currentOutputKW, capacityKW, status }
+AgentDecision { id, timestamp, agentName, action, rationale, confidenceScore, predictedImpact, costImpact, carbonImpact, alternativesConsidered[] }
+GridState { timestamp, totalGeneration, totalDemand, batterySoC, gridStabilityScore, frequency, voltage }
+DisruptionEvent { id, type, timestamp, severity, resolvedBy, resolutionTimeSeconds }
+
+APIs:
+
+No mandatory external API — generate synthetic solar (sine curve + noise), wind (random-walk), and demand (daily curve with morning/evening peaks) data server-side.
+Optional real API: Open-Meteo (https://api.open-meteo.com/v1/forecast) — free, no key required — for real solar irradiance/wind speed to feed the Renewable Forecasting Agent.
+Optional: Anthropic API (api.anthropic.com/v1/messages) to generate natural-language decision rationale for the Grid Coordinator Agent.
+
+Mock/seed data: Pre-populate 5 nodes (Solar Farm A – 500kW cap, Wind Farm B – 300kW cap, Battery Bank – 200kWh, EV Station – 150kW cap, Industrial Load – variable), 24h of historical synthetic data for charts on first load.
+
+7. STEP-BY-STEP BUILD INSTRUCTIONS FOR REPLIT AGENT
+Scaffold a Node.js + Express + TypeScript backend and a React + Vite + TypeScript frontend in one Replit project (client/ and server/ folders), with Tailwind CSS and shadcn/ui configured in client/.
+Build the simulation engine in server/: a tick loop (setInterval, 2s) that updates GridNode outputs using sine/random-walk functions for solar/wind, a daily-curve function for load, and battery SoC math (charge/discharge based on net supply-demand).
+Implement the 5 agents as server-side modules, each running logic on every tick: Renewable Forecasting Agent (predicts next-15-min output from recent trend), Demand Forecasting Agent (predicts next-15-min load), Battery Management Agent (decides charge/discharge to minimize cost + maximize stability), Fault Detection Agent (flags anomalies when generation/demand delta exceeds threshold), Grid Coordinator Agent (aggregates all agent outputs into final dispatch decision + writes AgentDecision log entry with rationale, confidence score, and impact estimates).
+Set up Socket.IO server to broadcast GridState updates and new AgentDecision entries to connected clients every tick.
+Build the Express REST API: GET /api/grid/state, GET /api/agents/decisions (paginated), GET /api/history (last 24h), POST /api/disruption (inject outage/spike/renewable-drop), POST /api/simulator/params (adjust EV demand, solar output multiplier).
+On frontend, set up Socket.IO client and global state (React Context or Zustand) to hold live GridState and AgentDecision feed.
+Build the Dashboard page: KPI cards with animated count-up (Framer Motion), digital twin preview widget, live agent feed panel, disruption injection button with confirmation toast.
+Build the Digital Twin page: SVG diagram of nodes connected by animated flow-line paths (dash-offset animation speed/color driven by live power values); clicking a node opens a slide-in detail panel.
+Build the Agent Console page: reverse-chronological list of AgentDecision entries, each as an expandable card showing rationale, confidence score (as a ring/badge), predicted impact, cost/carbon numbers, and alternatives considered.
+Build the Analytics page using Recharts: area chart (generation vs demand vs battery SoC over time) and line chart (grid stability score over time), with a time-range toggle.
+Build the Scenario Simulator page: sliders for EV demand multiplier and solar output multiplier, buttons for "Simulate Outage," "Simulate Demand Spike," "Simulate Renewable Drop," and a Zone A↔Zone B energy trading toggle that shows a simulated price + kWh transferred.
+Apply the dark control-room theme globally (Tailwind config: custom colors, Inter + JetBrains Mono fonts via Google Fonts import), add sidebar navigation with active-route highlighting and icons (lucide-react).
+Seed 24 hours of historical synthetic data into an SQLite file (better-sqlite3) on server startup so Analytics has data immediately without waiting for live ticks to accumulate.
+Add a global toast/notification system (shadcn/ui toast) that fires when Fault Detection Agent flags an anomaly or Grid Coordinator executes a major decision.
+Test the full disruption-to-recovery loop end-to-end: click "Inject Disruption" → Fault Detection Agent flags it within 1 tick → Grid Coordinator + Battery Agent respond → dashboard KPIs and digital twin visibly react within 2-4 seconds → new AgentDecision entries appear in Agent Console with full explainability.
+Polish: add loading skeletons, empty states, responsive layout for smaller screens, and a landing hero moment (brief animated intro) when the app first loads.

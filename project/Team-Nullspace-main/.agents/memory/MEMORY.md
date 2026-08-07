@@ -1,0 +1,1 @@
+- [OpenAPI numeric compatibility](openapi-numeric-compatibility.md) — use number for generated count fields when the workspace Zod runtime cannot emit integer schemas.
