@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { Link, Route, Switch, useLocation } from 'wouter';
+import { Link, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
 import {
   getGetAgentDecisionsQueryKey, getGetGridHistoryQueryKey, getGetGridStateQueryKey,
   useGetAgentDecisions, useGetGridHistory, useGetGridState, useInjectDisruption,
@@ -170,7 +170,7 @@ function Simulator() {
 }
 
 function Router() {
-  return <Shell><Switch><Route path="/" component={Dashboard} /><Route path="/digital-twin" component={DigitalTwin} /><Route path="/agents" component={Agents} /><Route path="/analytics" component={Analytics} /><Route path="/simulator" component={Simulator} /><Route component={NotFound} /></Switch></Shell>;
+  return <WouterRouter base={import.meta.env.BASE_URL}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/digital-twin" component={DigitalTwin} /><Route path="/agents" component={Agents} /><Route path="/analytics" component={Analytics} /><Route path="/simulator" component={Simulator} /><Route component={NotFound} /></Switch></Shell></WouterRouter>;
 }
 
 function App() {
