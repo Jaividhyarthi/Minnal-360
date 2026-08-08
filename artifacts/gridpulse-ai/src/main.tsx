@@ -11,3 +11,4 @@ if (window.location.hostname.includes('.app.github.dev')) {
 }
 
 createRoot(document.getElementById('root')!).render(<App />);
+

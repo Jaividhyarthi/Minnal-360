@@ -174,7 +174,7 @@ function IntroVideo({ onDone }: { onDone: () => void }) {
 }
 
 function Router() {
-  return <WouterRouter base={import.meta.env.BASE_URL.replace(//$/, '')}><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/digital-twin" component={DigitalTwin} /><Route path="/agents" component={Agents} /><Route path="/analytics" component={Analytics} /><Route path="/simulator" component={Simulator} /><Route component={NotFound} /></Switch></Shell></WouterRouter>;
+  return <WouterRouter base="/Minnal-360"><Shell><Switch><Route path="/" component={Dashboard} /><Route path="/digital-twin" component={DigitalTwin} /><Route path="/agents" component={Agents} /><Route path="/analytics" component={Analytics} /><Route path="/simulator" component={Simulator} /><Route component={NotFound} /></Switch></Shell></WouterRouter>;
 }
 
 function App() {
