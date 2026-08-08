@@ -22,9 +22,12 @@ jobs:
       - run: pnpm --filter gridpulse-ai run build
         env:
           VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          PORT: 3000
+          BASE_PATH: /Minnal-360/
+          NODE_ENV: production
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./artifacts/gridpulse-ai/dist
+          path: ./artifacts/gridpulse-ai/dist/public
   deploy:
     needs: build
     runs-on: ubuntu-latest
